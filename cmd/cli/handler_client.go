@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"context"
+
 	"github.com/ory/hydra/client"
 	"github.com/ory/hydra/config"
 	"github.com/ory/hydra/pkg"
@@ -135,7 +136,7 @@ func (h *ClientHandler) GetClient(cmd *cobra.Command, args []string) {
 		fmt.Printf("%s\n", err)
 		return
 	}
-	pkg.Must(err, "Could not delete client: %s", err)
+	pkg.Must(err, "Could not get client: %s", err)
 
 	out, err := json.MarshalIndent(cl, "", "\t")
 	pkg.Must(err, "Could not convert client to JSON: %s", err)

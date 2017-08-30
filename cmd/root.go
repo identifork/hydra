@@ -94,6 +94,9 @@ func initConfig() {
 	viper.BindEnv("DATABASE_PLUGIN")
 	viper.SetDefault("DATABASE_PLUGIN", "")
 
+	viper.BindEnv("DATABASE_VENDOR_PLUGIN")
+	viper.SetDefault("DATABASE_VENDOR_PLUGIN", "")
+
 	viper.BindEnv("DATABASE_URL")
 	viper.SetDefault("DATABASE_URL", "")
 

@@ -21,7 +21,7 @@ func newClientManager(c *config.Config) client.Manager {
 			DB:     con.GetDatabase(),
 			Hasher: ctx.Hasher,
 		}
-	case *config.PluginConnection:
+	case config.PluginConnection:
 		if m, err := con.NewClientManager(); err != nil {
 			c.GetLogger().Fatalf("Could not load client manager plugin %s", err)
 		} else {

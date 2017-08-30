@@ -37,7 +37,7 @@ func RunHost(c *config.Config) func(cmd *cobra.Command, args []string) {
 		}
 		serverHandler.registerRoutes(router)
 		c.ForceHTTP, _ = cmd.Flags().GetBool("dangerous-force-http")
-
+		logger.Debugf("Issuer is %s", c.Issuer)
 		if !c.ForceHTTP {
 			if c.Issuer == "" {
 				logger.Fatalln("Issuer must be explicitly specified unless --dangerous-force-http is passed. To find out more, use `hydra help host`.")

@@ -132,6 +132,10 @@ imports:
   version: 3d30c83329259f53a904d428b38d8cb8fba7bd77
 - name: github.com/ory/herodot
   version: 5bb399b8a5aa583343a2108e723b990432b4a1b4
+- name: github.com/ory/hydra-oracle-plugin
+  version: 9e8b8804c6b098da0bb9a6d53936a15b1edd148c
+  repo: https://github.com/cperfect/hydra-oracle-plugin.git
+  vcs: git
 - name: github.com/ory/ladon
   version: 306b2e6adf322d429e72ace6be16818dda75f574
   subpackages:
@@ -211,6 +215,10 @@ imports:
   subpackages:
   - clientcredentials
   - internal
+- name: golang.org/x/sync
+  version: f52d1811a62927559de87708c8913c1650ce4f26
+  subpackages:
+  - errgroup
 - name: golang.org/x/sys
   version: ebfc5b4631820b793c9010c87fd8fef0f39eb082
   subpackages:

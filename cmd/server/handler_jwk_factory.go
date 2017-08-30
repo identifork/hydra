@@ -22,7 +22,7 @@ func injectJWKManager(c *config.Config) {
 			},
 		}
 		break
-	case *config.PluginConnection:
+	case config.PluginConnection:
 		var err error
 		ctx.KeyManager, err = con.NewJWKManager()
 		if err != nil {

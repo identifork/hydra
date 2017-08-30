@@ -1,5 +1,9 @@
 package: github.com/ory/hydra
 import:
+- package: github.com/ory/hydra-oracle-plugin
+  version: vendored-oracle-plugin
+  repo: https://github.com/cperfect/hydra-oracle-plugin.git
+  vcs: git
 - package: github.com/sirupsen/logrus
   version: master
 - package: github.com/Sirupsen/logrus
@@ -67,6 +71,9 @@ import:
   - clientcredentials
 - package: gopkg.in/yaml.v2
 - package: github.com/mohae/deepcopy
+- package: gopkg.in/rana/ora.v4
+  version: v4.1.10
+- package: golang.org/x/sync/errgroup
 testImport:
 - package: github.com/bmizerany/assert
 - package: github.com/ory/dockertest

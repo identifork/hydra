@@ -1,6 +1,8 @@
 package config
 
 import (
+	"plugin"
+
 	"github.com/jmoiron/sqlx"
 	"github.com/ory/fosite"
 	"github.com/ory/hydra/client"
@@ -10,10 +12,19 @@ import (
 	"github.com/ory/ladon"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"plugin"
 )
 
-type PluginConnection struct {
+type PluginConnection interface {
+	load() error
+	Connect() error
+	NewClientManager() (client.Manager, error)
+	NewGroupManager() (group.Manager, error)
+	NewJWKManager() (jwk.Manager, error)
+	NewOAuth2Manager(client.Manager) (pkg.FositeStorer, error)
+	NewPolicyManager() (ladon.Manager, error)
+}
+
+type GoPluginConnection struct {
 	Config     *Config
 	plugin     *plugin.Plugin
 	didConnect bool
@@ -21,7 +32,7 @@ type PluginConnection struct {
 	db         *sqlx.DB
 }
 
-func (c *PluginConnection) load() error {
+func (c *GoPluginConnection) load() error {
 	if c.plugin != nil {
 		return nil
 	}
@@ -36,7 +47,7 @@ func (c *PluginConnection) load() error {
 	return nil
 }
 
-func (c *PluginConnection) Connect() error {
+func (c *GoPluginConnection) Connect() error {
 	cf := c.Config
 	if c.didConnect {
 		return nil
@@ -65,7 +76,7 @@ func (c *PluginConnection) Connect() error {
 	return nil
 }
 
-func (c *PluginConnection) NewClientManager() (client.Manager, error) {
+func (c *GoPluginConnection) NewClientManager() (client.Manager, error) {
 	if err := c.load(); err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -80,7 +91,7 @@ func (c *PluginConnection) NewClientManager() (client.Manager, error) {
 	}
 }
 
-func (c *PluginConnection) NewGroupManager() (group.Manager, error) {
+func (c *GoPluginConnection) NewGroupManager() (group.Manager, error) {
 	if err := c.load(); err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -94,7 +105,7 @@ func (c *PluginConnection) NewGroupManager() (group.Manager, error) {
 	}
 }
 
-func (c *PluginConnection) NewJWKManager() (jwk.Manager, error) {
+func (c *GoPluginConnection) NewJWKManager() (jwk.Manager, error) {
 	if err := c.load(); err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -110,7 +121,7 @@ func (c *PluginConnection) NewJWKManager() (jwk.Manager, error) {
 	}
 }
 
-func (c *PluginConnection) NewOAuth2Manager(clientManager client.Manager) (pkg.FositeStorer, error) {
+func (c *GoPluginConnection) NewOAuth2Manager(clientManager client.Manager) (pkg.FositeStorer, error) {
 	if err := c.load(); err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -124,7 +135,7 @@ func (c *PluginConnection) NewOAuth2Manager(clientManager client.Manager) (pkg.F
 	}
 }
 
-func (c *PluginConnection) NewPolicyManager() (ladon.Manager, error) {
+func (c *GoPluginConnection) NewPolicyManager() (ladon.Manager, error) {
 	if err := c.load(); err != nil {
 		return nil, errors.WithStack(err)
 	}

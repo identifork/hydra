@@ -46,6 +46,7 @@ type Config struct {
 	SystemSecret           string `mapstructure:"SYSTEM_SECRET" yaml:"-"`
 	DatabaseURL            string `mapstructure:"DATABASE_URL" yaml:"-"`
 	DatabasePlugin         string `mapstructure:"DATABASE_PLUGIN" yaml:"-"`
+	DatabaseVendorPlugin   string `mapstructure:"DATABASE_VENDOR_PLUGIN" yaml:"-"`
 	ConsentURL             string `mapstructure:"CONSENT_URL" yaml:"-"`
 	AllowTLSTermination    string `mapstructure:"HTTPS_ALLOW_TERMINATION_FROM" yaml:"-"`
 	BCryptWorkFactor       int    `mapstructure:"BCRYPT_COST" yaml:"-"`
@@ -187,13 +188,20 @@ func (c *Config) Context() *Context {
 	if c.context != nil {
 		return c.context
 	}
-
+	c.GetLogger().Debugf("Config %#v", c)
 	var connection interface{} = &MemoryConnection{}
 	if c.DatabaseURL == "" {
 		c.GetLogger().Fatalf(`DATABASE_URL is not set, use "export DATABASE_URL=memory" for an in memory storage or the documented database adapters.`)
+	} else if c.DatabaseVendorPlugin != "" {
+		c.GetLogger().Infof("Database vendor plugin set to %s", c.DatabaseVendorPlugin)
+		vc := &VendoredPluginConnection{Config: c, Logger: c.GetLogger()}
+		if err := vc.Connect(); err != nil {
+			c.GetLogger().Fatalf("Could not connect via database vendor plugin: %s", err)
+		}
+		connection = vc
 	} else if c.DatabasePlugin != "" {
 		c.GetLogger().Infof("Database plugin set to %s", c.DatabasePlugin)
-		pc := &PluginConnection{Config: c, Logger: c.GetLogger()}
+		pc := &GoPluginConnection{Config: c, Logger: c.GetLogger()}
 		if err := pc.Connect(); err != nil {
 			c.GetLogger().Fatalf("Could not connect via database plugin: %s", err)
 		}
@@ -220,6 +228,7 @@ func (c *Config) Context() *Context {
 
 	var groupManager group.Manager
 	var manager ladon.Manager
+	c.GetLogger().Debugf("Connection %#v", connection)
 	switch con := connection.(type) {
 	case *MemoryConnection:
 		c.GetLogger().Printf("DATABASE_URL set to memory, connecting to ephermal in-memory database.")
@@ -232,7 +241,7 @@ func (c *Config) Context() *Context {
 			DB: con.GetDatabase(),
 		}
 		break
-	case *PluginConnection:
+	case PluginConnection:
 		var err error
 		manager, err = con.NewPolicyManager()
 		if err != nil {
@@ -244,8 +253,20 @@ func (c *Config) Context() *Context {
 			c.GetLogger().Fatalf("Could not load group manager plugin %s", err)
 		}
 		break
+	// case *VendoredPluginConnection: //TODO do we need the duplication?
+	// 	var err error
+	// 	manager, err = con.NewPolicyManager()
+	// 	if err != nil {
+	// 		c.GetLogger().Fatalf("Could not load policy manager vendor plugin %s", err)
+	// 	}
+
+	// 	groupManager, err = con.NewGroupManager()
+	// 	if err != nil {
+	// 		c.GetLogger().Fatalf("Could not load group manager vendor plugin %s", err)
+	// 	}
+	// 	break
 	default:
-		panic("Unknown connection type.")
+		panic(fmt.Sprintf("Unknown connection type: %#v", con))
 	}
 
 	c.context = &Context{
