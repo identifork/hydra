@@ -3,7 +3,7 @@
 package config
 
 import (
-	"github.com/ory/hydra-oracle-plugin/plugin"
+	"github.com/cperfect/hydra-oracle-plugin/plugin"
 )
 
 /**
